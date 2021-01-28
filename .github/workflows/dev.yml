@@ -9,7 +9,15 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    env:
+      PROJECT_DIRECTORY_PATH: "CICDTraining"
+      IIS_SERVER_COMPUTER_NAME: ${{ secrets.IIS_SERVER_COMPUTER_NAME }}
+      IIS_WEBSITE_NAME: ${{ secrets.IIS_WEBSITE_NAME }}
+      IIS_SERVER_USERNAME: ${{ secrets.IIS_SERVER_USERNAME }}
+      IIS_SERVER_PASSWORD: ${{ secrets.IIS_SERVER_PASSWORD }}
+      RECYCLE_APP_NAME: ${{ secrets.RECYCLE_APP_NAME }}
+      WEBSITE_CONTENT_PATH: ${{ secrets.WEBSITE_CONTENT_PATH }}
 
     steps:
     - uses: actions/checkout@v2
@@ -17,7 +25,15 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
+    - name: Caching
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: ${{ runner.os }}-nuget-   
     - name: Restore dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: dotnet restore
     - name: Build
       run: dotnet build 
@@ -28,3 +44,6 @@ jobs:
       with:
         name: CICDDemo
         path: /home/runner/work/CI_CD_Training/CI_CD_Training/CICDTraining/bin/Debug/netcoreapp3.1/publish/
+    - name: Deploy Application
+      shell: cmd
+      run: '"C:/Program Files (x86)/IIS/Microsoft Web Deploy V3/msdeploy.exe" -verb:sync -allowUntrusted -useCheckSum -source:contentPath="%CD%\${{ env.PROJECT_DIRECTORY_PATH }}\bin\debug\netcoreapp3.1\publish\" -dest:contentPath="C:\inetpub\CICDTraining",computerName="${{ env.IIS_SERVER_COMPUTER_NAME }}/msdeploy.axd?site=${{ env.IIS_WEBSITE_NAME }}",username="${{ env.IIS_SERVER_USERNAME }}",password="${{ env.IIS_SERVER_PASSWORD }}",authtype="Basic"'
