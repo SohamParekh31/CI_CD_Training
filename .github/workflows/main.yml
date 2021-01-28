@@ -44,6 +44,4 @@ jobs:
       with:
         name: CICDDemo
         path: /home/runner/work/CI_CD_Training/CI_CD_Training/CICDTraining/bin/Release/netcoreapp3.1/publish/
-    - name: Deploy Application
-      shell: cmd
-      run: '"C:/Program Files (x86)/IIS/Microsoft Web Deploy V3/msdeploy.exe" -verb:sync -allowUntrusted -useCheckSum -source:contentPath="D:\CSharp\CICDTraining\CICDTraining\bin\Release\netcoreapp3.1\publish" -dest:contentPath="C:\inetpub\CICDTraining",computerName="https://52.66.60.199:8172/msdeploy.axd?site=MySite",username="EC2AMAZ-7U8RI29\Administrator",password="Sohamparekh5",authtype="Basic"'
+   
